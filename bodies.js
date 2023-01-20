@@ -53,16 +53,26 @@ function AddTarget(target) {
 }
 
 
+
 document.getElementById('button2').addEventListener('click', () => {
+
+    const inputValues = Array.from(document.querySelectorAll('input'))
+    const step = 0.5;
+    let startTime = 0;
+    const notes = inputValues.reduce((acc, input) => {
+        const currentNote = {
+            pitch: input.value,
+            startTime,
+            endTime: startTime + step
+        }
+        startTime += step
+        acc.push(currentNote)
+        return acc
+    },   [] );
+    console.log(notes)
+
     const newBox = new MusicTarget('boxC', Bodies.rectangle(300, 200, 80, 80), {
-        notes: [
-            { pitch: 20, startTime: 0.0, endTime: 0.1 },
-            { pitch: 40, startTime: 0.5, endTime: 1.0 },
-            { pitch: 80, startTime: 1.0, endTime: 1.5 },
-            { pitch: 60, startTime: 1.5, endTime: 2.0 },
-            { pitch: 20, startTime: 2.0, endTime: 2.5 },
-            { pitch: 40, startTime: 2.5, endTime: 3.0 },
-        ],
+        notes,
         totalTime: 3,
     });
 
