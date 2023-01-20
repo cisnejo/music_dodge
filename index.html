@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script src="matter.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@magenta/music@^1.0.0"></script>
+
+    <!-- You need to bring your own Tone.js for the player, and tfjs for the model -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.58/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/1.2.8/tf.min.js"></script>
+    <!-- Core library, since we're going to use a player -->
+    <script src="https://cdn.jsdelivr.net/npm/@magenta/music@^1.0.0/es6/core.js"></script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,5 +17,6 @@
     <canvas id="canvas"></canvas>
     <button id="button2">button2</button>
   </body>
+  <script src="matter.js"></script>
   <script type="module" src="/main.js"></script>
 </html>
