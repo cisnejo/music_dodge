@@ -1,6 +1,7 @@
 // module aliases
 import MusicTarget from "./musicTarget";
 import Player from "./Player";
+import './matter'
 // eslint-disable-next-line no-undef
 const { Engine, Render, Runner, Bodies, Composite, Events, Detector } = Matter;
 
