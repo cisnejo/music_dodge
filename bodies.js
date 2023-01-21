@@ -20,7 +20,7 @@ const render = Render.create({
 });
 
 // eslint-disable-next-line no-undef
-// const soundPlayer = new core.Player();
+const soundPlayer = new core.Player();
 
 // create two boxes and a ground
 
@@ -98,24 +98,31 @@ engine.gravity.scale = 0
 
 Events.on(engine, 'collisionStart', () => {
     const collisionList = Detector.collisions(detector);
+    console.log(detector.bodies)
     collisionList.forEach((a) => {
+
         // Check to see if ground is in detection array
         if ((a.bodyA === ground || a.bodyB === ground)) {
             if ((a.bodyA !== player.body && a.bodyB !== player.body)) {
                 const extendedElement = a.bodyA !== ground ? a.bodyA : a.bodyB;
                 Composite.remove(engine.world, extendedElement)
+                if (soundPlayer.isPlaying()) soundPlayer.stop();
+                soundPlayer.start(boxList.find((box) => box.body === extendedElement).sound);
             }
         }
         else if (a.bodyA === player.body || a.bodyB === player.body) {
+
             // if there is ground, assign variable to NOT ground
             const extendedElement = a.bodyA !== player.body ? a.bodyA : a.bodyB;
             // check if object is flagged for removal
             if (!boxList.find((box) => box.body === extendedElement).removed) {
+
+                Composite.remove(engine.world, extendedElement);
                 // // remove object
                 // Composite.remove(engine.world, extendedElement);
                 // // stop player if there was one going
-                // if (soundPlayer.isPlaying()) soundPlayer.stop();
-                // soundPlayer.start(boxList.find((box) => box.body === extendedElement).sound);
+                if (soundPlayer.isPlaying()) soundPlayer.stop();
+                soundPlayer.start(boxList.find((box) => box.body === extendedElement).sound);
                 // boxList.find((box) => box.body === extendedElement).removed = true;
             }
         }
@@ -144,7 +151,8 @@ window.addEventListener('keydown', (event) => {
 })
 window.addEventListener('keyup', (event) => {
 
-    if (event.key === "d" || event.key === "a" || event.key === "w" || event.key === "s") {
+    if (event.key === "d" || event.key === "a" ||
+        event.key === "w" || event.key === "s") {
         player.moveStop()
     }
 

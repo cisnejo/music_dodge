@@ -15,6 +15,7 @@ export default class Player {
         this.alive = true
         this.speed = 3
         this.radius = 10
+        this.isMoving = false
         // this.body = Bodies.rectangle(this.playerPosX, this.playerPosY, this.playerWidth, this.playerHeight)
         this.body = Bodies.circle(this.playerPosX, this.playerPosY, this.radius)
         this.Spawn = (engine, detector) => {
@@ -39,6 +40,7 @@ export default class Player {
         }
 
         this.move = ({ x: xVector, y: yVector }) => {
+            this.isMoving = true
             const x = xVector * this.speed
             const y = yVector * this.speed
             const positionVector = { x, y }
