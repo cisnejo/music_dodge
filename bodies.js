@@ -93,7 +93,7 @@ Composite.add(engine.world, [ground])
 // Composite.add(engine.world, player.body)
 
 
-
+engine.gravity.scale = 0
 
 
 Events.on(engine, 'collisionStart', () => {
@@ -135,6 +135,19 @@ window.addEventListener('keydown', (event) => {
     if (event.key === "a") {
         player.moveLeft()
     }
+    if (event.key === "w") {
+        player.moveUp()
+    }
+    if (event.key === "s") {
+        player.moveDown()
+    }
+})
+window.addEventListener('keyup', (event) => {
+
+    if (event.key === "d" || event.key === "a" || event.key === "w" || event.key === "s") {
+        player.moveStop()
+    }
+
 })
 
 // setInterval(()=>{
