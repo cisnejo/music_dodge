@@ -66,18 +66,16 @@ export default class Player {
             const x = xVector
             const y = yVector
             const positionVector = { x, y }
-
-            //  Body.translate(this.body, positionVector)
+            //  Body.translate(this.body, positionVector
             Body.setVelocity(this.body, positionVector)
         }
         this.moveStop = (event) => {
-
             this.isMoving.splice(this.isMoving.indexOf(event.key), 1)
             if (this.isMoving.length === 0) {
                 Body.setVelocity(this.body, { x: 0, y: 0 })
             }
             if ((event.key === "d" || event.key === "a") && (!this.isMoving.includes('a') && !this.isMoving.includes('d'))) {
-                    Body.setVelocity(this.body, { x: 0, y: this.body.velocity.y })
+                Body.setVelocity(this.body, { x: 0, y: this.body.velocity.y })
             }
             if ((event.key === "w" || event.key === "s") && (!this.isMoving.includes('s') && !this.isMoving.includes('w'))) {
                 Body.setVelocity(this.body, { x: this.body.velocity.x, y: 0 })

@@ -88,11 +88,10 @@ Events.on(engine, 'collisionStart', () => {
 
 player.Spawn(engine, detector)
 player.body.friction = 0
-player.body.fritctionAir = 0
+player.body.frictionAir = 0
 player.body.frictionStatic = 0
 
 window.addEventListener('keydown', (event) => {
-console.log(event.key)
     if (event.key === "d") {
         player.moveRight("d")
     }
@@ -147,7 +146,7 @@ window.addEventListener('keyup', (event) => {
 
 //     Body.setVelocity(newBox.body, { x: 0, y: 8 })
 //     newBox.body.friction = 0
-//     newBox.body.fritctionAir = 0
+//     newBox.body.frictionAir = 0
 //     newBox.body.frictionStatic = 0
 //     AddTarget(newBox)
 
