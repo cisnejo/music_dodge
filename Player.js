@@ -1,6 +1,7 @@
 
 import Bullet from './Bullet'
-
+// for help -- https://brm.io/matter-js/docs/classes/Body.html 
+// eslint-disable-next-line no-undef
 const { Body, Bodies, Composite, Detector } = Matter;
 
 export default class Player {
@@ -27,23 +28,25 @@ export default class Player {
             bullet.Spawn()
         }
         this.moveRight = () => {
-            this.move({ x: 1, y: 0 })
+            this.move({ x: 1 * this.speed, y: this.body.velocity.y })
         }
         this.moveLeft = () => {
-            this.move({ x: -1, y: 0 })
+
+            this.move({ x: -1 * this.speed, y: this.body.velocity.y })
         }
         this.moveUp = () => {
-            this.move({ x: 0, y: -1 })
+            this.move({ x: this.body.velocity.x, y: -1 * this.speed })
         }
         this.moveDown = () => {
-            this.move({ x: 0, y: 1 })
+            this.move({ x: this.body.velocity.x, y: 1 * this.speed })
         }
 
         this.move = ({ x: xVector, y: yVector }) => {
             this.isMoving = true
-            const x = xVector * this.speed
-            const y = yVector * this.speed
+            const x = xVector
+            const y = yVector
             const positionVector = { x, y }
+
             //  Body.translate(this.body, positionVector)
             Body.setVelocity(this.body, positionVector)
         }

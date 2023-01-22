@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-undef
-const { Engine, Render, Runner, Bodies, Composite, Events, Detector } = Matter;
+const { Bodies, Composite } = Matter;
 
 export default class Bullet {
     constructor(engine, xPos, YPos, width, height) {
