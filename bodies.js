@@ -94,64 +94,64 @@ player.body.frictionStatic = 0
 window.addEventListener('keydown', (event) => {
 
     if (event.key === "d") {
-        player.moveRight()
+        player.moveRight("d")
     }
     if (event.key === "a") {
-        player.moveLeft()
+        player.moveLeft("a")
     }
     if (event.key === "w") {
-        player.moveUp()
+        player.moveUp("w")
     }
     if (event.key === "s") {
-        player.moveDown()
+        player.moveDown("s")
     }
 })
+
 window.addEventListener('keyup', (event) => {
 
-    /* if (event.key === "d" || event.key === "a" || event.key === "w" || event.key === "s") {
-         player.moveStop()
-     } */
-
+    if (event.key === "d" || event.key === "a" || event.key === "w" || event.key === "s") {
+        player.moveStop(event)
+    }
 })
 
-setInterval(() => {
-    const inputValues = Array.from(document.querySelectorAll('input'))
-    const step = 0.5;
-    let startTime = 0;
-    const notes = inputValues.reduce((acc, input) => {
-        const currentNote = {
-            pitch: input.value,
-            startTime,
-            endTime: startTime + step
-        }
-        startTime += step
-        acc.push(currentNote)
-        return acc
-    }, []);
+// setInterval(() => {
+//     const inputValues = Array.from(document.querySelectorAll('input'))
+//     const step = 0.5;
+//     let startTime = 0;
+//     const notes = inputValues.reduce((acc, input) => {
+//         const currentNote = {
+//             pitch: input.value,
+//             startTime,
+//             endTime: startTime + step
+//         }
+//         startTime += step
+//         acc.push(currentNote)
+//         return acc
+//     }, []);
 
-    const { width: canvasWidth } = render.canvas
+//     const { width: canvasWidth } = render.canvas
 
-    const boxWidth = 20
-    //  const boxHeight = max.y - min.y
+//     const boxWidth = 20
+//     //  const boxHeight = max.y - min.y
 
-    const constrainedWidth = canvasWidth - boxWidth
-    // const constrainedHeight = canvasHeight - boxHeight
+//     const constrainedWidth = canvasWidth - boxWidth
+//     // const constrainedHeight = canvasHeight - boxHeight
 
-    const randX = randomIntFromInterval(boxWidth, constrainedWidth)
+//     const randX = randomIntFromInterval(boxWidth, constrainedWidth)
 
-    const newBox = new MusicTarget('boxC', Bodies.rectangle(randX, -50, 20, 20), {
-        notes,
-        totalTime: 3,
-    });
+//     const newBox = new MusicTarget('boxC', Bodies.rectangle(randX, -50, 20, 20), {
+//         notes,
+//         totalTime: 3,
+//     });
 
 
-    Body.setVelocity(newBox.body, { x: 0, y: 8 })
-    newBox.body.friction = 0
-    newBox.body.fritctionAir = 0
-    newBox.body.frictionStatic = 0
-    AddTarget(newBox)
+//     Body.setVelocity(newBox.body, { x: 0, y: 8 })
+//     newBox.body.friction = 0
+//     newBox.body.fritctionAir = 0
+//     newBox.body.frictionStatic = 0
+//     AddTarget(newBox)
 
-}, 500)
+// }, 500)
 
 // // a little fun
 // document.getElementById('button2').addEventListener('click', () => {
