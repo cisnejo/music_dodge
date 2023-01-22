@@ -15,5 +15,8 @@
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^4.2.1",
     "vite": "^4.0.0"
+  },
+  "dependencies": {
+    "@types/matter-js": "^0.18.2"
   }
 }
