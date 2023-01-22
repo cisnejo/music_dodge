@@ -92,7 +92,7 @@ player.body.fritctionAir = 0
 player.body.frictionStatic = 0
 
 window.addEventListener('keydown', (event) => {
-
+console.log(event.key)
     if (event.key === "d") {
         player.moveRight("d")
     }

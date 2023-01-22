@@ -62,7 +62,6 @@ export default class Player {
         }
 
         this.move = ({ x: xVector, y: yVector, key }) => {
-            console.log(key)
             this.isMoving = [...new Set([...this.isMoving, key])]
             const x = xVector
             const y = yVector
@@ -74,14 +73,13 @@ export default class Player {
         this.moveStop = (event) => {
 
             this.isMoving.splice(this.isMoving.indexOf(event.key), 1)
-            console.log(this.isMoving)
             if (this.isMoving.length === 0) {
                 Body.setVelocity(this.body, { x: 0, y: 0 })
             }
-            if (event.key === "d" || event.key === "a") {
-                Body.setVelocity(this.body, { x: 0, y: this.body.velocity.y })
+            if ((event.key === "d" || event.key === "a") && (!this.isMoving.includes('a') && !this.isMoving.includes('d'))) {
+                    Body.setVelocity(this.body, { x: 0, y: this.body.velocity.y })
             }
-            if (event.key === "w" || event.key === "s") {
+            if ((event.key === "w" || event.key === "s") && (!this.isMoving.includes('s') && !this.isMoving.includes('w'))) {
                 Body.setVelocity(this.body, { x: this.body.velocity.x, y: 0 })
             }
 
