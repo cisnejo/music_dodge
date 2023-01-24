@@ -86,47 +86,60 @@ Events.on(engine, 'collisionStart', () => {
     });
 });
 
+Events.on(runner, 'afterUpdate', () => {
+    if (player.isMovingRight) {
+        Body.setVelocity(player.body, { x: 1 * player.speed, y: player.body.velocity.y })
+    } else if (!player.isMovingRight && player.horizontalMovement.length > 0) {
+        Body.setVelocity(player.body, { x: - 1 * player.speed, y: player.body.velocity.y })
+    }
+    else {
+        Body.setVelocity(player.body, { x: 0, y: player.body.velocity.y })
+    }
+    if (player.isMovingUp) {
+        Body.setVelocity(player.body, { x: player.body.velocity.x, y: -1 * player.speed })
+    } else if (!player.isMovingUp && player.verticalMovement.length > 0) {
+        Body.setVelocity(player.body, { x: player.body.velocity.x, y: 1 * player.speed })
+    }
+    else {
+        Body.setVelocity(player.body, { x: player.body.velocity.x, y: 0 })
+    }
+
+
+})
+
 player.Spawn(engine, detector)
 player.body.friction = 0
 player.body.frictionAir = 0
 player.body.frictionStatic = 0
 
 window.addEventListener('keydown', (event) => {
-    if (event.key === "d") {
-        player.moveRight("d")
+    if (event.key === "d" || event.key === "a" || event.key === "w" || event.key === "s") {
+        const { key } = event
+        player.isMoving(key)
     }
-    if (event.key === "a") {
-        player.moveLeft("a")
-    }
-    if (event.key === "w") {
-        player.moveUp("w")
-    }
-    if (event.key === "s") {
-        player.moveDown("s")
-    }
+
 })
 
 window.addEventListener('keyup', (event) => {
-
     if (event.key === "d" || event.key === "a" || event.key === "w" || event.key === "s") {
         player.moveStop(event)
     }
 })
 
 // setInterval(() => {
-//     const inputValues = Array.from(document.querySelectorAll('input'))
-//     const step = 0.5;
-//     let startTime = 0;
-//     const notes = inputValues.reduce((acc, input) => {
-//         const currentNote = {
-//             pitch: input.value,
-//             startTime,
-//             endTime: startTime + step
-//         }
-//         startTime += step
-//         acc.push(currentNote)
-//         return acc
-//     }, []);
+//     // const inputValues = Array.from(document.querySelectorAll('input'))
+//     // const step = 0.5;
+//     // let startTime = 0;
+//     // const notes = inputValues.reduce((acc, input) => {
+//     //     const currentNote = {
+//     //         pitch: input.value,
+//     //         startTime,
+//     //         endTime: startTime + step
+//     //     }
+//     //     startTime += step
+//     //     acc.push(currentNote)
+//     //     return acc
+//     // }, []);
 
 //     const { width: canvasWidth } = render.canvas
 
@@ -139,10 +152,9 @@ window.addEventListener('keyup', (event) => {
 //     const randX = randomIntFromInterval(boxWidth, constrainedWidth)
 
 //     const newBox = new MusicTarget('boxC', Bodies.rectangle(randX, -50, 20, 20), {
-//         notes,
+//         notes: [0],
 //         totalTime: 3,
-//     });
-
+//     })
 
 //     Body.setVelocity(newBox.body, { x: 0, y: 8 })
 //     newBox.body.friction = 0
@@ -150,7 +162,7 @@ window.addEventListener('keyup', (event) => {
 //     newBox.body.frictionStatic = 0
 //     AddTarget(newBox)
 
-// }, 500)
+// }, 1000)
 
 // // a little fun
 // document.getElementById('button2').addEventListener('click', () => {
