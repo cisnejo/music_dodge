@@ -74,8 +74,8 @@ world.gravity.scale = 0;
 var body = Bodies.rectangle(100, 100, 20, 20);
 Composite.add(world, body);
 var ground = Bodies.rectangle(400, 300, 810, 60, { isStatic: true });
-
-Composite.add(world, ground);
+var wall1 = Bodies.rectangle(200, 300, 810, 60, { isStatic: true });
+Composite.add(world, [ground,wall1]);
 
 window.addEventListener("click", (e) => {
   const clientX = e.clientX;
@@ -90,10 +90,12 @@ window.addEventListener("click", (e) => {
   const angle = (Math.atan2(diffY, diffX) * 180) / Math.PI;
   console.log(diffX, diffY);
   Matter.Body.setAngle(body, angle);
-
-  // Matter.Body.setAngularVelocity(body, (1 * Math.abs(diffX)) / diffX);
+  const hypot = Math.hypot(diffX,diffY)
+  const ratio = 10
+const hypotRatio = hypot/ratio
+Matter.Body.setAngularVelocity(body, (1 * Math.abs(diffX)) / diffX);
   Matter.Body.setVelocity(body, {
-    x: diffX/97,
-    y: diffY/97
+    x: diffX/hypotRatio,
+    y: diffY/hypotRatio
   });
 });
