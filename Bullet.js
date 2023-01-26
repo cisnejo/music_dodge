@@ -10,8 +10,10 @@ export default class Bullet {
         this.xPos = xPos
         this.damage = 10
         this.Spawn = () => {
-            const body = Bodies.rectangle(this.xPos, this.YPos, this.width, this.height)
+            const body = Bodies.rectangle(this.xPos, this.YPos, this.width, this.height )
+            body.label = "bullet"
             Composite.add(engine.world, body)
+            return body
         }
     }
 }

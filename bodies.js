@@ -9,6 +9,7 @@ const { Engine, Render, Runner, Bodies, Composite, Events, Detector, Body } = Ma
 const boxList = [];
 
 const ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
+ground.label = "ground"
 // create an engine
 const engine = Engine.create();
 
@@ -43,8 +44,8 @@ function randomIntFromInterval(min, max) { // min and max included
 
 const { x: groundX, y: groundY } = ground.position
 // const player = new Player(groundX / 2 + 55, groundY - 21, 20, 20, detector)
-const player = new Player(groundX / 2 + 55, groundY - 50, 20, 20)
-
+const player = new Player(groundX / 2 + 55, groundY - 50, 20, 20, engine, detector)
+player.body.label = "player"
 //  player.Shoot(engine, 100, 100, 100, 100)
 
 Composite.add(engine.world, ground)
@@ -62,7 +63,10 @@ Events.on(engine, 'collisionStart', () => {
         if ((detection.bodyA === ground || detection.bodyB === ground)) {
             if ((detection.bodyA !== player.body && detection.bodyB !== player.body)) {
                 const extendedElement = detection.bodyA !== ground ? detection.bodyA : detection.bodyB;
+                console.log(detector.bodies)
 
+                detector.bodies.splice(detector.bodies.indexOf(extendedElement), 1)
+                console.log(detector.bodies)
                 Composite.remove(engine.world, extendedElement)
 
                 return null
@@ -75,6 +79,7 @@ Events.on(engine, 'collisionStart', () => {
             if (!boxList.find((box) => box.body === extendedElement).removed) {
                 // // remove object
                 Composite.remove(engine.world, extendedElement);
+
                 // // stop player if there was one going
                 // if (soundPlayer.isPlaying()) soundPlayer.stop();
                 // soundPlayer.start(boxList.find((box) => box.body === extendedElement).sound);
@@ -107,7 +112,7 @@ Events.on(runner, 'afterUpdate', () => {
 
 })
 
-player.Spawn(engine, detector)
+player.Spawn()
 player.body.friction = 0
 player.body.frictionAir = 0
 player.body.frictionStatic = 0
@@ -125,6 +130,34 @@ window.addEventListener('keyup', (event) => {
         player.moveStop(event)
     }
 })
+
+
+document.querySelector('canvas')?.addEventListener("click", (e) => {
+
+    // const bullet = player.Shoot()
+
+    const { x: clientX, clientY } = e
+    const bodyX = player.body.position.x;
+    const bodyY = player.body.position.y;
+
+    const diffX = clientX - bodyX;
+    const diffY = clientY - bodyY;
+
+    const angle = (Math.atan2(diffY, diffX) * 180) / Math.PI;
+
+
+    Body.setAngle(player.body, angle);
+    const hypot = Math.hypot(diffX, diffY)
+    const ratio = 10
+    const hypotRatio = hypot / ratio
+    const bullet = player.Shoot(player.body.position.x, player.body.position.y, 10, 10)
+    Detector.setBodies(detector, [...detector.bodies, bullet])
+    Body.setAngularVelocity(bullet, (1 * Math.abs(diffX)) / diffX);
+    Body.setVelocity(bullet, {
+        x: diffX / hypotRatio,
+        y: diffY / hypotRatio
+    });
+});
 
 // setInterval(() => {
 //     // const inputValues = Array.from(document.querySelectorAll('input'))
