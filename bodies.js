@@ -63,10 +63,8 @@ Events.on(engine, 'collisionStart', () => {
         if ((detection.bodyA === ground || detection.bodyB === ground)) {
             if ((detection.bodyA !== player.body && detection.bodyB !== player.body)) {
                 const extendedElement = detection.bodyA !== ground ? detection.bodyA : detection.bodyB;
-                console.log(detector.bodies)
 
                 detector.bodies.splice(detector.bodies.indexOf(extendedElement), 1)
-                console.log(detector.bodies)
                 Composite.remove(engine.world, extendedElement)
 
                 return null
@@ -86,6 +84,13 @@ Events.on(engine, 'collisionStart', () => {
                 // boxList.find((box) => box.body === extendedElement).removed = true;
             }
             return null
+        }
+
+        else if ((detection.bodyA.label === "bullet" || detection.bodyB.label === "bullet") && (detection.bodyA.label === "hostile" || detection.bodyB.label === "hostile")) {
+            detector.bodies.splice(detector.bodies.indexOf(detection.bodyA), 1)
+            Composite.remove(engine.world, detection.bodyA)
+            detector.bodies.splice(detector.bodies.indexOf(detection.bodyB), 1)
+            Composite.remove(engine.world, detection.bodyB)
         }
         return null
     });
@@ -148,7 +153,7 @@ document.querySelector('canvas')?.addEventListener("click", (e) => {
 
     Body.setAngle(player.body, angle);
     const hypot = Math.hypot(diffX, diffY)
-    const ratio = 10
+    const ratio = 15
     const hypotRatio = hypot / ratio
     const bullet = player.Shoot(player.body.position.x, player.body.position.y, 10, 10)
     Detector.setBodies(detector, [...detector.bodies, bullet])
@@ -159,43 +164,43 @@ document.querySelector('canvas')?.addEventListener("click", (e) => {
     });
 });
 
-// setInterval(() => {
-//     // const inputValues = Array.from(document.querySelectorAll('input'))
-//     // const step = 0.5;
-//     // let startTime = 0;
-//     // const notes = inputValues.reduce((acc, input) => {
-//     //     const currentNote = {
-//     //         pitch: input.value,
-//     //         startTime,
-//     //         endTime: startTime + step
-//     //     }
-//     //     startTime += step
-//     //     acc.push(currentNote)
-//     //     return acc
-//     // }, []);
+setInterval(() => {
+    // const inputValues = Array.from(document.querySelectorAll('input'))
+    // const step = 0.5;
+    // let startTime = 0;
+    // const notes = inputValues.reduce((acc, input) => {
+    //     const currentNote = {
+    //         pitch: input.value,
+    //         startTime,
+    //         endTime: startTime + step
+    //     }
+    //     startTime += step
+    //     acc.push(currentNote)
+    //     return acc
+    // }, []);
 
-//     const { width: canvasWidth } = render.canvas
+    const { width: canvasWidth } = render.canvas
 
-//     const boxWidth = 20
-//     //  const boxHeight = max.y - min.y
+    const boxWidth = 20
+    //  const boxHeight = max.y - min.y
 
-//     const constrainedWidth = canvasWidth - boxWidth
-//     // const constrainedHeight = canvasHeight - boxHeight
+    const constrainedWidth = canvasWidth - boxWidth
+    // const constrainedHeight = canvasHeight - boxHeight
 
-//     const randX = randomIntFromInterval(boxWidth, constrainedWidth)
+    const randX = randomIntFromInterval(boxWidth, constrainedWidth)
 
-//     const newBox = new MusicTarget('boxC', Bodies.rectangle(randX, -50, 20, 20), {
-//         notes: [0],
-//         totalTime: 3,
-//     })
+    const newBox = new MusicTarget('boxC', Bodies.rectangle(randX, -50, 20, 20), {
+        notes: [0],
+        totalTime: 3,
+    })
+    newBox.body.label = "hostile"
+    Body.setVelocity(newBox.body, { x: 0, y: 5 })
+    newBox.body.friction = 0
+    newBox.body.frictionAir = 0
+    newBox.body.frictionStatic = 0
+    AddTarget(newBox)
 
-//     Body.setVelocity(newBox.body, { x: 0, y: 8 })
-//     newBox.body.friction = 0
-//     newBox.body.frictionAir = 0
-//     newBox.body.frictionStatic = 0
-//     AddTarget(newBox)
-
-// }, 1000)
+}, 1000)
 
 // // a little fun
 // document.getElementById('button2').addEventListener('click', () => {
