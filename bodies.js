@@ -5,7 +5,10 @@ import Player from "./Player";
 // eslint-disable-next-line no-undef
 const { Engine, Render, Runner, Bodies, Composite, Events, Detector, Body } = Matter;
 
-
+function removeBody(engine, detector, body) {
+    detector.bodies.splice(detector.bodies.indexOf(body), 1)
+    Composite.remove(engine.world, body)
+}
 const boxList = [];
 
 const ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
@@ -46,12 +49,9 @@ const { x: groundX, y: groundY } = ground.position
 // const player = new Player(groundX / 2 + 55, groundY - 21, 20, 20, detector)
 const player = new Player(groundX / 2 + 55, groundY - 50, 20, 20, engine, detector)
 player.body.label = "player"
-//  player.Shoot(engine, 100, 100, 100, 100)
 
 Composite.add(engine.world, ground)
 Detector.setBodies(detector, [...detector.bodies, ground])
-// Composite.add(engine.world, player.body)
-
 
 engine.gravity.scale = 0
 
@@ -63,10 +63,7 @@ Events.on(engine, 'collisionStart', () => {
         if ((detection.bodyA === ground || detection.bodyB === ground)) {
             if ((detection.bodyA !== player.body && detection.bodyB !== player.body)) {
                 const extendedElement = detection.bodyA !== ground ? detection.bodyA : detection.bodyB;
-
-                detector.bodies.splice(detector.bodies.indexOf(extendedElement), 1)
-                Composite.remove(engine.world, extendedElement)
-
+                removeBody(engine, detector, extendedElement)
                 return null
             }
         }
@@ -76,7 +73,7 @@ Events.on(engine, 'collisionStart', () => {
             // check if object is flagged for removal
             if (!boxList.find((box) => box.body === extendedElement).removed) {
                 // // remove object
-                Composite.remove(engine.world, extendedElement);
+                removeBody(engine, detector, extendedElement)
 
                 // // stop player if there was one going
                 // if (soundPlayer.isPlaying()) soundPlayer.stop();
@@ -87,10 +84,8 @@ Events.on(engine, 'collisionStart', () => {
         }
 
         else if ((detection.bodyA.label === "bullet" || detection.bodyB.label === "bullet") && (detection.bodyA.label === "hostile" || detection.bodyB.label === "hostile")) {
-            detector.bodies.splice(detector.bodies.indexOf(detection.bodyA), 1)
-            Composite.remove(engine.world, detection.bodyA)
-            detector.bodies.splice(detector.bodies.indexOf(detection.bodyB), 1)
-            Composite.remove(engine.world, detection.bodyB)
+            removeBody(engine, detector, detection.bodyA)
+            removeBody(engine, detector, detection.bodyB)
         }
         return null
     });
@@ -150,10 +145,9 @@ document.querySelector('canvas')?.addEventListener("click", (e) => {
 
     const angle = (Math.atan2(diffY, diffX) * 180) / Math.PI;
 
-
     Body.setAngle(player.body, angle);
     const hypot = Math.hypot(diffX, diffY)
-    const ratio = 15
+    const ratio = .001
     const hypotRatio = hypot / ratio
     const bullet = player.Shoot(player.body.position.x, player.body.position.y, 10, 10)
     Detector.setBodies(detector, [...detector.bodies, bullet])
