@@ -5,11 +5,28 @@ import Player from "./Player";
 // eslint-disable-next-line no-undef
 const { Engine, Render, Runner, Bodies, Composite, Events, Detector, Body } = Matter;
 
+const music_rnn = new mm.MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/basic_rnn');
+music_rnn.initialize();
+
+const rnnPlayer = new mm.Player();
+
+function play(note) {
+    if (rnnPlayer.isPlaying()) {
+        rnnPlayer.stop();
+    }
+
+    rnnPlayer.start(note)
+}
+
+
 function removeBody(engine, detector, body) {
     detector.bodies.splice(detector.bodies.indexOf(body), 1)
     Composite.remove(engine.world, body)
 }
 const boxList = [];
+
+
+
 
 const ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
 ground.label = "ground"
@@ -62,8 +79,11 @@ Events.on(engine, 'collisionStart', () => {
         // Check to see if ground is in detection array
         if ((detection.bodyA === ground || detection.bodyB === ground)) {
             if ((detection.bodyA !== player.body && detection.bodyB !== player.body)) {
+
                 const extendedElement = detection.bodyA !== ground ? detection.bodyA : detection.bodyB;
+
                 removeBody(engine, detector, extendedElement)
+
                 return null
             }
         }
@@ -74,6 +94,7 @@ Events.on(engine, 'collisionStart', () => {
             if (!boxList.find((box) => box.body === extendedElement).removed) {
                 // // remove object
                 removeBody(engine, detector, extendedElement)
+                console.log(detector.bodies)
 
                 // // stop player if there was one going
                 // if (soundPlayer.isPlaying()) soundPlayer.stop();
@@ -84,6 +105,15 @@ Events.on(engine, 'collisionStart', () => {
         }
 
         else if ((detection.bodyA.label === "bullet" || detection.bodyB.label === "bullet") && (detection.bodyA.label === "hostile" || detection.bodyB.label === "hostile")) {
+            const hostile = detection.bodyA.label === "hostile" ? detection.bodyA : detection.bodyB
+            console.log(boxList.find((box) => box.body === hostile))
+            if (rnnPlayer.isPlaying()) {
+                rnnPlayer.stop();
+            }
+
+            rnnPlayer.start(boxList.find((box) => box.body === hostile).sound)
+
+            // play(boxList.find((box) => box.body === hostile).sound)
             removeBody(engine, detector, detection.bodyA)
             removeBody(engine, detector, detection.bodyB)
         }
@@ -91,7 +121,68 @@ Events.on(engine, 'collisionStart', () => {
     });
 });
 
+const startTime = new Date().getTime()
+let newTime = startTime
+let noteCounter = 0;
+let notesForNewSong = []
+let timeLength = 15000
+
+const TWINKLE_TWINKLE = {
+    notes: [
+        { pitch: 60, startTime: 0.0, endTime: 0.5 },
+        { pitch: 60, startTime: 0.0, endTime: 0.5 },
+        { pitch: 67, startTime: 0.0, endTime: 0.5 },
+        { pitch: 67, startTime: 0.0, endTime: 0.5 },
+        { pitch: 69, startTime: 0.0, endTime: 0.5 },
+        { pitch: 69, startTime: 0.0, endTime: 0.5 },
+        { pitch: 67, startTime: 0.0, endTime: 0.5 },
+        { pitch: 65, startTime: 0.0, endTime: 0.5 },
+        { pitch: 65, startTime: 0.0, endTime: 0.5 },
+        { pitch: 64, startTime: 0.0, endTime: 0.5 },
+        { pitch: 64, startTime: 0.0, endTime: 0.5 },
+        { pitch: 62, startTime: 0.0, endTime: 0.5 },
+        { pitch: 60, startTime: 0.0, endTime: 0.5 },
+    ],
+    totalTime: 8
+};
+
+const spawnBoxInterval = (note, stopTime) => {
+    const spawnInterval = stopTime / (note.notes.length)
+    const currentTime = new Date().getTime()
+    const { width: canvasWidth } = render.canvas
+
+    const boxWidth = 20
+    //  const boxHeight = max.y - min.y
+
+    const constrainedWidth = canvasWidth - boxWidth
+    // const constrainedHeight = canvasHeight - boxHeight
+
+    const randX = randomIntFromInterval(boxWidth, constrainedWidth)
+
+    const newBox = new MusicTarget(`Box_${noteCounter}`, Bodies.rectangle(randX, -50, 20, 20), {
+        notes: [note.notes[noteCounter]],
+        totalTime: 0.5,
+    })
+    newBox.body.label = "hostile"
+    Body.setVelocity(newBox.body, { x: 0, y: 3 })
+    newBox.body.friction = 0
+    newBox.body.frictionAir = 0
+    newBox.body.frictionStatic = 0
+
+
+    if (currentTime - newTime > spawnInterval) {
+        if (currentTime - startTime > stopTime) {
+            return
+        }
+        newTime = currentTime
+        AddTarget(newBox)
+        noteCounter += 1
+    }
+}
+
 Events.on(runner, 'afterUpdate', () => {
+
+
     if (player.isMovingRight) {
         Body.setVelocity(player.body, { x: 1 * player.speed, y: player.body.velocity.y })
     } else if (!player.isMovingRight && player.horizontalMovement.length > 0) {
@@ -110,7 +201,11 @@ Events.on(runner, 'afterUpdate', () => {
     }
 
 
+    spawnBoxInterval(TWINKLE_TWINKLE, timeLength)
+
 })
+
+
 
 player.Spawn()
 player.body.friction = 0
@@ -147,7 +242,7 @@ document.querySelector('canvas')?.addEventListener("click", (e) => {
 
     Body.setAngle(player.body, angle);
     const hypot = Math.hypot(diffX, diffY)
-    const ratio = .001
+    const ratio = 10
     const hypotRatio = hypot / ratio
     const bullet = player.Shoot(player.body.position.x, player.body.position.y, 10, 10)
     Detector.setBodies(detector, [...detector.bodies, bullet])
@@ -158,43 +253,8 @@ document.querySelector('canvas')?.addEventListener("click", (e) => {
     });
 });
 
-setInterval(() => {
-    // const inputValues = Array.from(document.querySelectorAll('input'))
-    // const step = 0.5;
-    // let startTime = 0;
-    // const notes = inputValues.reduce((acc, input) => {
-    //     const currentNote = {
-    //         pitch: input.value,
-    //         startTime,
-    //         endTime: startTime + step
-    //     }
-    //     startTime += step
-    //     acc.push(currentNote)
-    //     return acc
-    // }, []);
 
-    const { width: canvasWidth } = render.canvas
 
-    const boxWidth = 20
-    //  const boxHeight = max.y - min.y
-
-    const constrainedWidth = canvasWidth - boxWidth
-    // const constrainedHeight = canvasHeight - boxHeight
-
-    const randX = randomIntFromInterval(boxWidth, constrainedWidth)
-
-    const newBox = new MusicTarget('boxC', Bodies.rectangle(randX, -50, 20, 20), {
-        notes: [0],
-        totalTime: 3,
-    })
-    newBox.body.label = "hostile"
-    Body.setVelocity(newBox.body, { x: 0, y: 5 })
-    newBox.body.friction = 0
-    newBox.body.frictionAir = 0
-    newBox.body.frictionStatic = 0
-    AddTarget(newBox)
-
-}, 1000)
 
 // // a little fun
 // document.getElementById('button2').addEventListener('click', () => {

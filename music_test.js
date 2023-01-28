@@ -11,11 +11,13 @@ function play() {
         return;
     }
 
-    // The model expects a quantized sequence, and ours was unquantized:
+    The model expects a quantized sequence, and ours was unquantized:
     const qns = mm.sequences.quantizeNoteSequence(TWINKLE_TWINKLE, 4);
     music_rnn
         .continueSequence(qns, rnn_steps, rnn_temperature)
         .then((sample) => rnnPlayer.start(sample));
+
+    rnnPlayer.start(TWINKLE_TWINKLE)
 }
 
 const TWINKLE_TWINKLE = {
