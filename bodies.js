@@ -5,6 +5,8 @@ import Player from "./Player";
 // eslint-disable-next-line no-undef
 const { Engine, Render, Runner, Bodies, Composite, Events, Detector, Body } = Matter;
 
+const startButton = document.getElementById("start_button")
+const gameStatusText = document.getElementById('game_status')?.querySelector('span')
 const music_rnn = new mm.MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/basic_rnn');
 music_rnn.initialize();
 
@@ -53,7 +55,6 @@ const detector = Detector.create();
 
 function AddTarget(target) {
     boxList.push(target)
-
     Composite.add(engine.world, target.body)
     Detector.setBodies(detector, [...detector.bodies, target.body]);
 }
@@ -94,8 +95,6 @@ Events.on(engine, 'collisionStart', () => {
             if (!boxList.find((box) => box.body === extendedElement).removed) {
                 // // remove object
                 removeBody(engine, detector, extendedElement)
-                console.log(detector.bodies)
-
                 // // stop player if there was one going
                 // if (soundPlayer.isPlaying()) soundPlayer.stop();
                 // soundPlayer.start(boxList.find((box) => box.body === extendedElement).sound);
@@ -106,13 +105,12 @@ Events.on(engine, 'collisionStart', () => {
 
         else if ((detection.bodyA.label === "bullet" || detection.bodyB.label === "bullet") && (detection.bodyA.label === "hostile" || detection.bodyB.label === "hostile")) {
             const hostile = detection.bodyA.label === "hostile" ? detection.bodyA : detection.bodyB
-            console.log(boxList.find((box) => box.body === hostile))
             if (rnnPlayer.isPlaying()) {
                 rnnPlayer.stop();
             }
-
-            rnnPlayer.start(boxList.find((box) => box.body === hostile).sound)
-
+            const musicObject = boxList.find((box) => box.body === hostile)
+            rnnPlayer.start(musicObject.sound)
+            notesForNewSong = [...notesForNewSong, musicObject.sound.notes[0]]
             // play(boxList.find((box) => box.body === hostile).sound)
             removeBody(engine, detector, detection.bodyA)
             removeBody(engine, detector, detection.bodyB)
@@ -121,12 +119,16 @@ Events.on(engine, 'collisionStart', () => {
     });
 });
 
-const startTime = new Date().getTime()
-let newTime = startTime
+
+let newTime
+let gameStartTime
 let noteCounter = 0;
 let notesForNewSong = []
-let timeLength = 15000
+const gameLength = 20000
+// eslint-disable-next-line no-unused-vars
+let newSong
 
+let stoppedGame = false
 const TWINKLE_TWINKLE = {
     notes: [
         { pitch: 60, startTime: 0.0, endTime: 0.5 },
@@ -141,14 +143,25 @@ const TWINKLE_TWINKLE = {
         { pitch: 64, startTime: 0.0, endTime: 0.5 },
         { pitch: 64, startTime: 0.0, endTime: 0.5 },
         { pitch: 62, startTime: 0.0, endTime: 0.5 },
+        { pitch: 62, startTime: 0.0, endTime: 0.5 },
         { pitch: 60, startTime: 0.0, endTime: 0.5 },
     ],
     totalTime: 8
 };
 
-const spawnBoxInterval = (note, stopTime) => {
-    const spawnInterval = stopTime / (note.notes.length)
+startButton?.addEventListener('click', () => {
+    newTime = new Date().getTime()
+    gameStartTime = newTime
+    startButton.setAttribute('data-started', 'true')
+    // @ts-ignore
+    gameStatusText.innerText = 'Started'
+})
+const spawnBoxInterval = (note, gameLength) => {
+    const interval = (gameLength / (note.notes.length))
+    console.log(interval)
     const currentTime = new Date().getTime()
+
+
     const { width: canvasWidth } = render.canvas
 
     const boxWidth = 20
@@ -170,13 +183,23 @@ const spawnBoxInterval = (note, stopTime) => {
     newBox.body.frictionStatic = 0
 
 
-    if (currentTime - newTime > spawnInterval) {
-        if (currentTime - startTime > stopTime) {
-            return
-        }
+
+    if (currentTime - newTime > interval) {
         newTime = currentTime
         AddTarget(newBox)
         noteCounter += 1
+        if (currentTime - gameStartTime > gameLength && !stoppedGame) {
+            stoppedGame = true
+            startButton?.setAttribute('data-started', 'false')
+            // @ts-ignore
+            gameStatusText.innerText = 'Stopped'
+            newSong = notesForNewSong.map((testNote, index) => {
+                const startTime = index % 2 === 0 ? index + 0.5 : (Math.floor(index + 1) / 2)
+                const endTime = startTime + 0.5
+                return { note: testNote.pitch, startTime, endTime }
+            })
+        }
+
     }
 }
 
@@ -200,9 +223,9 @@ Events.on(runner, 'afterUpdate', () => {
         Body.setVelocity(player.body, { x: player.body.velocity.x, y: 0 })
     }
 
-
-    spawnBoxInterval(TWINKLE_TWINKLE, timeLength)
-
+    if (startButton?.getAttribute('data-started') === 'true') {
+        spawnBoxInterval(TWINKLE_TWINKLE, gameLength)
+    }
 })
 
 
@@ -231,22 +254,29 @@ document.querySelector('canvas')?.addEventListener("click", (e) => {
 
     // const bullet = player.Shoot()
 
-    const { x: clientX, clientY } = e
+    // position is from window, that's why angle is off
+    const { offsetTop, offsetLeft } = e.currentTarget
+    const { clientX, clientY } = e
     const bodyX = player.body.position.x;
     const bodyY = player.body.position.y;
 
-    const diffX = clientX - bodyX;
-    const diffY = clientY - bodyY;
+    const diffX = clientX - bodyX - offsetLeft;
+    const diffY = clientY - bodyY - offsetTop;
+
+    // console.log(`x: ${diffX} || y:${diffY}`)
+    // console.log(`mouse-x: ${diffX} || bod-x:${bodyX}`)
 
     const angle = (Math.atan2(diffY, diffX) * 180) / Math.PI;
 
     Body.setAngle(player.body, angle);
+
+
     const hypot = Math.hypot(diffX, diffY)
     const ratio = 10
     const hypotRatio = hypot / ratio
     const bullet = player.Shoot(player.body.position.x, player.body.position.y, 10, 10)
     Detector.setBodies(detector, [...detector.bodies, bullet])
-    Body.setAngularVelocity(bullet, (1 * Math.abs(diffX)) / diffX);
+    // Body.setAngularVelocity(bullet, (1 * Math.abs(diffX)) / diffX);
     Body.setVelocity(bullet, {
         x: diffX / hypotRatio,
         y: diffY / hypotRatio
@@ -255,43 +285,3 @@ document.querySelector('canvas')?.addEventListener("click", (e) => {
 
 
 
-
-// // a little fun
-// document.getElementById('button2').addEventListener('click', () => {
-
-//     const inputValues = Array.from(document.querySelectorAll('input'))
-//     const step = 0.5;
-//     let startTime = 0;
-//     const notes = inputValues.reduce((acc, input) => {
-//         const currentNote = {
-//             pitch: input.value,
-//             startTime,
-//             endTime: startTime + step
-//         }
-//         startTime += step
-//         acc.push(currentNote)
-//         return acc
-//     }, []);
-
-//     const { width: canvasWidth } = render.canvas
-
-//     const boxWidth = 20
-//     //  const boxHeight = max.y - min.y
-
-//     const constrainedWidth = canvasWidth - boxWidth
-//     // const constrainedHeight = canvasHeight - boxHeight
-
-//     const randX = randomIntFromInterval(boxWidth, constrainedWidth)
-
-//     const newBox = new MusicTarget('boxC', Bodies.rectangle(randX, 200, 20, 20), {
-//         notes,
-//         totalTime: 3,
-//     });
-
-
-//     Body.setVelocity(newBox.body, { x: 0, y: 5 })
-//     newBox.body.friction = 0
-//     newBox.body.fritctionAir = 0
-//     newBox.body.frictionStatic = 0
-//     AddTarget(newBox)
-// });
