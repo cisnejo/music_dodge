@@ -272,7 +272,7 @@ document.querySelector('canvas')?.addEventListener("click", (e) => {
 
 
     const hypot = Math.hypot(diffX, diffY)
-    const ratio = 10
+    const ratio = 30
     const hypotRatio = hypot / ratio
     const bullet = player.Shoot(player.body.position.x, player.body.position.y, 10, 10)
     Detector.setBodies(detector, [...detector.bodies, bullet])
